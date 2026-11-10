@@ -26,6 +26,11 @@ public class FakturController {
         return fakturService.terbitkan(soId);
     }
 
+    @PostMapping("/{id}/lunasi")
+    public FakturDto lunasi(@PathVariable Long id) {
+        return fakturService.lunasi(id);
+    }
+
     @GetMapping
     public List<FakturDto> daftar() {
         return fakturService.daftar();

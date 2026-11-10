@@ -78,4 +78,41 @@ class FakturApiTest {
     void soTidakAda() throws Exception {
         mvc.perform(post("/api/faktur/9999")).andExpect(status().isNotFound());
     }
+
+    @Test
+    void lunasiFakturBelumLunas() throws Exception {
+        mvc.perform(post("/api/faktur/2/lunasi"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nomor").value("INV/2026/10/00002"))
+                .andExpect(jsonPath("$.status").value("LUNAS"));
+
+        mvc.perform(get("/api/faktur"))
+                .andExpect(jsonPath("$[?(@.id == 2)].status").value("LUNAS"));
+    }
+
+    @Test
+    void fakturYangSudahLunasTidakBisaDilunasiLagi() throws Exception {
+        mvc.perform(post("/api/faktur/1/lunasi"))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.pesan").value(org.hamcrest.Matchers.containsString("sudah lunas")));
+    }
+
+    @Test
+    void lunasiFakturTidakAda() throws Exception {
+        mvc.perform(post("/api/faktur/9999/lunasi"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.pesan").value("Faktur 9999 tidak ditemukan."));
+    }
+
+    @Test
+    void pelunasanMengurangiPiutangDanMembukaLimitKredit() throws Exception {
+        String so = """
+                {"kodeCustomer": "CUS-021", "item": [{"kodeProduk": "BSK-004", "qty": 500}]}
+                """;
+        mvc.perform(post("/api/faktur/6/lunasi")).andExpect(status().isOk());
+        mvc.perform(post("/api/sales-orders").contentType(MediaType.APPLICATION_JSON).content(so))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.total").value(7105000.0))
+                .andExpect(jsonPath("$.status").value("SIAP_DIFAKTURKAN"));
+    }
 }
