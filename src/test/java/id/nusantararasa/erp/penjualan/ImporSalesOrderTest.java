@@ -11,6 +11,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.jayway.jsonpath.JsonPath;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
@@ -55,5 +57,18 @@ class ImporSalesOrderTest {
                 ERP3-SO-2026-0480,2026-10-01,CUS-999,BSK-001,10,9500
                 """))
                 .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    void soHasilImporBerdiskonTambahanNolDanBisaDifakturkan() throws Exception {
+        String hasil = mvc.perform(post("/api/sales-orders/impor").contentType("text/csv").content(CSV))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$[0].diskonTambahan").value(0))
+                .andReturn().getResponse().getContentAsString();
+        Integer id = JsonPath.read(hasil, "$[0].id");
+
+        mvc.perform(post("/api/faktur/" + id))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.total").value(1822800.0));
     }
 }

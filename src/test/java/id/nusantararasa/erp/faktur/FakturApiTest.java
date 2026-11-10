@@ -78,4 +78,26 @@ class FakturApiTest {
     void soTidakAda() throws Exception {
         mvc.perform(post("/api/faktur/9999")).andExpect(status().isNotFound());
     }
+
+    @Test
+    void terbitkanFakturUntukSoImporDenganDiskonTambahanKosong() throws Exception {
+        // SO 13: hasil impor, CUS-004 (Distributor, termin 45 hari), diskon_tambahan NULL di data awal
+        String jatuhTempo = LocalDate.now(ZoneId.of("Asia/Jakarta")).plusDays(45).toString();
+        mvc.perform(post("/api/faktur/13"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.nomorSalesOrder").value("ERP3-SO-2026-0451"))
+                .andExpect(jsonPath("$.total").value(30888000.0))
+                .andExpect(jsonPath("$.rincian[0].diskonPersen").value(12.0))
+                .andExpect(jsonPath("$.jatuhTempo").value(jatuhTempo));
+
+        mvc.perform(get("/api/sales-orders/13"))
+                .andExpect(jsonPath("$.status").value("DIFAKTURKAN"));
+    }
+
+    @Test
+    void semuaSoImporDataAwalBisaDifakturkan() throws Exception {
+        for (int id = 14; id <= 16; id++) {
+            mvc.perform(post("/api/faktur/" + id)).andExpect(status().isCreated());
+        }
+    }
 }

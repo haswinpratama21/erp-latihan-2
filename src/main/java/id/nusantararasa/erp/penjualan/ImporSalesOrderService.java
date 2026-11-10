@@ -87,6 +87,7 @@ public class ImporSalesOrderService {
         so.setCustomer(customer);
         so.setSumber(SumberSalesOrder.IMPOR);
         so.setDiskonStandar(AturanPenjualan.diskonStandar(customer.getSegmen()));
+        so.setDiskonTambahan(BigDecimal.ZERO);
         so.setTotal(BigDecimal.ZERO);
         so.setStatus(StatusSalesOrder.SIAP_DIFAKTURKAN);
         so.setCatatan("Impor dari sistem lama");

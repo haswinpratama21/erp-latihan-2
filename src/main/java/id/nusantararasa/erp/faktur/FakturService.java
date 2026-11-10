@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,7 +48,8 @@ public class FakturService {
                     + ", belum bisa difakturkan.");
         }
 
-        BigDecimal diskon = so.getDiskonStandar().add(so.getDiskonTambahan());
+        BigDecimal diskon = so.getDiskonStandar()
+                .add(Objects.requireNonNullElse(so.getDiskonTambahan(), BigDecimal.ZERO));
         List<FakturDto.Baris> rincian = new ArrayList<>();
         BigDecimal total = BigDecimal.ZERO;
         for (SalesOrderItem i : so.getItem()) {
