@@ -1,0 +1,16 @@
+target/
+*.class
+*.log
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+.DS_Store
+
+# Catatan: .env SENGAJA tidak diabaikan. Isinya dummy dan dipakai di latihan
+# izin agent (mini praktik) dan uji keamanan. Di project sungguhan, .env wajib masuk .gitignore.

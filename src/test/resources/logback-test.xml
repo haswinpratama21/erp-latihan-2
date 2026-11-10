@@ -1,0 +1,5 @@
+<configuration>
+    <!-- log test cukup WARN ke atas supaya hasil mvn test mudah dibaca -->
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+    <root level="WARN"/>
+</configuration>

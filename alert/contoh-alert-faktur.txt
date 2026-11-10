@@ -1,0 +1,35 @@
+[ALERT] [P2] erp-latihan: lonjakan HTTP 500 di POST /api/faktur/{soId}
+
+Monitor   : erp-latihan / error-rate-api-faktur
+Status    : TRIGGERED
+Layanan   : erp-latihan (versi 1.0.0-SNAPSHOT), instance app-1
+Endpoint  : POST /api/faktur/{soId}
+Ambang    : error rate > 5% selama 10 menit
+Nilai     : 26,1% (6 dari 23 request gagal)
+Pertama   : 2026-11-09 06:52:14 WIB
+Terakhir  : 2026-11-09 07:14:41 WIB
+Jumlah    : 6 kejadian, 4 soId berbeda (13, 14, 15, 16)
+Dampak    : faktur untuk SO tersebut tidak terbit. Request lain ke endpoint yang sama tetap 201.
+
+Contoh request gagal:
+  POST /api/faktur/14  ->  500 Internal Server Error
+  {"timestamp":"2026-11-09T07:14:41.118+07:00","status":500,"error":"Internal Server Error","path":"/api/faktur/14"}
+
+Log error terakhir (dipotong):
+2026-11-09T07:14:41.112+07:00 ERROR 1 --- [erp-latihan] [nio-8080-exec-7] o.a.c.c.C.[.[.[/].[dispatcherServlet] : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception [Request processing failed: java.lang.NullPointerException: Cannot read field "intCompact" because "augend" is null] with root cause
+
+java.lang.NullPointerException: Cannot read field "intCompact" because "augend" is null
+	at java.base/java.math.BigDecimal.add(BigDecimal.java:1382)
+	at id.nusantararasa.erp.faktur.FakturService.terbitkan(FakturService.java:50)
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:380)
+	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:728)
+	at id.nusantararasa.erp.faktur.FakturService$$SpringCGLIB$$0.terbitkan(<generated>)
+	at id.nusantararasa.erp.faktur.FakturController.terbitkan(FakturController.java:26)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	... 42 more
+
+Runbook   : docs/runbook-faktur.md
+Pemilik   : tim-penjualan
