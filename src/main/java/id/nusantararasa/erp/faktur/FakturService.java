@@ -72,6 +72,19 @@ public class FakturService {
         return FakturDto.dari(faktur, rincian);
     }
 
+    /** Tandai faktur lunas (pelunasan penuh). Piutang customer ikut berkurang. */
+    @Transactional
+    public FakturDto lunasi(Long id) {
+        Faktur faktur = fakturRepository.findById(id)
+                .orElseThrow(() -> new DataTidakDitemukanException("Faktur " + id + " tidak ditemukan."));
+        if (faktur.getStatus() == StatusFaktur.LUNAS) {
+            throw new AturanBisnisException("Faktur " + faktur.getNomor() + " sudah lunas.");
+        }
+        faktur.setStatus(StatusFaktur.LUNAS);
+        fakturRepository.saveAndFlush(faktur);
+        return FakturDto.dari(faktur, List.of());
+    }
+
     @Transactional(readOnly = true)
     public List<FakturDto> daftar() {
         return fakturRepository.findAllByOrderByIdDesc().stream()
